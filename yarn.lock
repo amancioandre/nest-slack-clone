@@ -602,6 +602,14 @@
     optional "0.1.4"
     tslib "2.0.1"
 
+"@nestjs/websockets@^7.4.4":
+  version "7.4.4"
+  resolved "https://registry.yarnpkg.com/@nestjs/websockets/-/websockets-7.4.4.tgz#2530f2f3d2271e2880be58246271f4c7d505f167"
+  integrity sha512-XT2lRnCiw2d6IpscRFcjjkUFA0FgZYaE3On1pmW8FvQSWlHnu3Izl/TgyySJZNDKpRnmnh4IGFA4GZ6VML//1A==
+  dependencies:
+    iterare "1.2.1"
+    tslib "2.0.1"
+
 "@nuxtjs/opencollective@0.2.2":
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@nuxtjs/opencollective/-/opencollective-0.2.2.tgz#26a761ebf588cc92a422d7cee996a66bd6e2761e"
@@ -695,6 +703,13 @@
   version "2.1.1"
   resolved "https://registry.yarnpkg.com/@types/cookiejar/-/cookiejar-2.1.1.tgz#90b68446364baf9efd8e8349bb36bd3852b75b80"
   integrity sha512-aRnpPa7ysx3aNW60hTiCtLHlQaIFsXFCgQlpakNgDNVFzbtusSY8PwjAQgRWfSk0ekNoBjO51eQRB6upA9uuyw==
+
+"@types/engine.io@*":
+  version "3.1.4"
+  resolved "https://registry.yarnpkg.com/@types/engine.io/-/engine.io-3.1.4.tgz#3d9472711d179daa7c95c051e50ad411e18a9bdc"
+  integrity sha512-98rXVukLD6/ozrQ2O80NAlWDGA4INg+tqsEReWJldqyi2fulC9V7Use/n28SWgROXKm6003ycWV4gZHoF8GA6w==
+  dependencies:
+    "@types/node" "*"
 
 "@types/eslint-visitor-keys@^1.0.0":
   version "1.0.0"
@@ -819,6 +834,14 @@
   dependencies:
     "@types/express-serve-static-core" "*"
     "@types/mime" "*"
+
+"@types/socket.io@^2.1.11":
+  version "2.1.11"
+  resolved "https://registry.yarnpkg.com/@types/socket.io/-/socket.io-2.1.11.tgz#e0d6759880e5f9818d5297a3328b36641bae996b"
+  integrity sha512-bVprmqPhJMLb9ZCm8g0Xy8kwBFRbnanOWSxzWkDkkIwxTvud5tKMfAJymXX6LQbizUKCS1yima7JM4BeLqjNqA==
+  dependencies:
+    "@types/engine.io" "*"
+    "@types/node" "*"
 
 "@types/source-list-map@*":
   version "0.1.2"
