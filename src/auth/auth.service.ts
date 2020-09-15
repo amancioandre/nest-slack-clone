@@ -12,10 +12,9 @@ export class AuthService {
         @InjectModel(User.name) private readonly userModel: Model<User>,
         private readonly jwtService: JwtService) {}
 
-    async signUp(signUpPayloadDTO: SignUpPayloadDTO): Promise<User> {
+    signUp(signUpPayloadDTO: SignUpPayloadDTO): Promise<User> {
         const user = new this.userModel(signUpPayloadDTO)
-
-        return await user.save()
+        return user.save()
     }
 
     async login(user: User): Promise<any> {
