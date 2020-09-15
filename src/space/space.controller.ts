@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
 import { SpaceService } from './space.service';
 import { Space } from './space.entity';
 import { CreateSpaceDTO } from './dto/create-space.dto';
 import { UpdateSpaceDTO } from './dto/update-space.dto';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
+import { CreateRoomDTO } from './dto/create-room.dto';
 
 @Controller('spaces')
 export class SpaceController {
@@ -37,9 +38,9 @@ export class SpaceController {
     }
 
     @UseGuards(JwtAuthGuard)
-    @Put(':id/join')
-    async joinSpace(@Param('id') id: string, @Req() req: { user: any }): Promise<Space> {
-        return await this.spaceService.joinSpace(id, req.user.id)
+    @Post(':id/rooms')
+    async addRoom(@Param('id') id: string, @Body() createRoomDTO: CreateRoomDTO): Promise<Space> {
+        return await this.spaceService.addRoom(id, createRoomDTO)
     }
 
 }

@@ -77,3 +77,5 @@ Nest is an MIT-licensed open source project. It can grow thanks to the sponsors 
 
 ## Useful Links
 - [NestJS Gateway - How to send JWT through socket emit](https://stackoverflow.com/questions/58670553/nestjs-gateway-websocket-how-to-send-jwt-access-token-through-socket-emit)
+
+- [Mongoose Subdocuments in Nest JS](https://stackoverflow.com/questions/62704600/mongoose-subdocuments-in-nest-js/62714058#62714058)

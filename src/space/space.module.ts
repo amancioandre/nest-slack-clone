@@ -5,6 +5,7 @@ import { SpaceSchema } from './space.entity';
 import { SpaceController } from './space.controller';
 import { UserModule } from 'src/user/user.module';
 import { UserSchema } from 'src/user/user.entity';
+import { RoomSchema } from 'src/room/room.entity';
 
 @Module({
   imports: [MongooseModule.forFeature([
@@ -15,6 +16,10 @@ import { UserSchema } from 'src/user/user.entity';
     {
       name: 'User',
       schema: UserSchema
+    },
+    {
+      name: 'Room',
+      schema: RoomSchema
     }
   ]),
   UserModule
