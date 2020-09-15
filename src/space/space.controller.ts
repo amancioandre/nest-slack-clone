@@ -37,7 +37,6 @@ export class SpaceController {
         return await this.spaceService.remove(id)
     }
 
-    @UseGuards(JwtAuthGuard)
     @Post(':id/rooms')
     async addRoom(@Param('id') id: string, @Body() createRoomDTO: CreateRoomDTO): Promise<Space> {
         return await this.spaceService.addRoom(id, createRoomDTO)
