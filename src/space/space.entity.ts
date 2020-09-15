@@ -1,5 +1,5 @@
 import { Schema, Prop, SchemaFactory } from "@nestjs/mongoose";
-import { Document } from "mongoose";
+import { Document, SchemaTypes } from "mongoose";
 import { User } from "src/user/user.entity";
 
 @Schema()
@@ -7,7 +7,7 @@ export class Space extends Document {
     @Prop()
     name: string
 
-    @Prop([User])
+    @Prop([{type: [SchemaTypes.ObjectId], ref: 'User'}])
     users: User[]
 }
 

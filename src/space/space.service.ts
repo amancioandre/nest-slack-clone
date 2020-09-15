@@ -4,12 +4,15 @@ import { InjectModel } from '@nestjs/mongoose';
 import { Model } from 'mongoose';
 import { CreateSpaceDTO } from './dto/create-space.dto';
 import { UpdateSpaceDTO } from './dto/update-space.dto';
+import { User } from 'src/user/user.entity';
 
 @Injectable()
 export class SpaceService {
     constructor(
         @InjectModel('Space')
-        private readonly spaceModel: Model<Space>
+        private readonly spaceModel: Model<Space>,
+        @InjectModel('User')
+        private readonly userModel: Model<User>
     ) {}
 
     async findAll(): Promise<Space[]> {
@@ -47,5 +50,21 @@ export class SpaceService {
     async remove(id: string): Promise<Space> {
         const space = await this.findOne(id)
         return space.remove()
+    }
+
+    async joinSpace(id: string, userId: string): Promise<Space> {
+        const space = await this.findOne(id)
+        const user = await this.userModel.findById(userId)
+
+        if (!space) {
+            throw new NotFoundException('Space not found.')
+        }
+
+        if (!user) {
+            throw new NotFoundException('User not found.')
+        }
+
+        space.users.push(user)
+        return space.save()
     }
 }
