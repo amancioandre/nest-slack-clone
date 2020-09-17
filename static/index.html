@@ -20,7 +20,7 @@
                 <v-row class="fill-height" no-gutters>
                 <v-navigation-drawer
                     mini-variant
-                    mini-variant-width="70"
+                    mini-variant-width="64"
                     permanent
                     color="#2D0B30"
                 >
@@ -28,16 +28,27 @@
                     dense
                     nav
                     >
-                        <v-list-item>
+                        <v-list-item class="mt-2">
                             <div class="text-center">
-                                <v-avatar tile color="blue" class="rounded-sm">
-                                  <v-icon dark>mdi-alarm</v-icon>
-                                </v-avatar>
+                                <v-badge color="red" offset-x="17" offset-y="15" bordered content="24">
+                                    <v-avatar tile color="blue" class="rounded-lg" size="40">
+                                        <v-icon dark>mdi-alarm</v-icon>
+                                    </v-avatar>
+                                </v-badge>
                             </div>
                         </v-list-item>
                         <v-list-item class="mt-2">
                             <div class="text-center">
-                                <v-avatar tile color="#6B536C" class="rounded-sm" elevation="1">
+                                <v-badge color="grey lighten-1" offset-x="6" offset-y="6" bordered dot>
+                                    <v-avatar tile color="amber" class="rounded-lg" size="40">
+                                        <v-icon dark>mdi-mail</v-icon>
+                                    </v-avatar>
+                                </v-badge>
+                            </div>
+                        </v-list-item>
+                        <v-list-item class="mt-4">
+                            <div class="text-center">
+                                <v-avatar tile color="#6B536C" class="rounded-lg" elevation="1" size="40">
                                   <v-icon light>mdi-plus</v-icon>
                                 </v-avatar>
                             </div>
@@ -113,10 +124,24 @@
         
             <v-main>
                 <v-container
-                class="fill-height"
+                class="fill-height d-flex align-end"
                 fluid
                 >
-                Chat goes here!
+                    <v-row>
+                        <v-col cols="12">
+                            <v-row>
+                                <v-col cols="1">
+                                    <v-avatar color="teal" tile size="48" class="rounded">
+                                        <span class="white--text headline">AM</span>
+                                    </v-avatar>
+                                </v-col>
+                                <v-col cols="11" class="pl-0">
+                                    <p class="mb-0"><span class="font-weight-black mr-2">User Name</span><small class="font-weight-light">7:02 PM</small></p>
+                                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
+                                </v-col>
+                            </v-row>
+                        </v-col>
+                    </v-row>
                 </v-container>
             </v-main>
             <v-footer app inset color="white">
