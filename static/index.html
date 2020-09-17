@@ -31,7 +31,7 @@
                         <v-list-item class="mt-2">
                             <div class="text-center">
                                 <v-badge color="red" offset-x="17" offset-y="15" bordered content="24">
-                                    <v-avatar tile color="blue" class="rounded-lg" size="40">
+                                    <v-avatar tile color="blue" class="rounded-lg" size="38">
                                         <v-icon dark>mdi-alarm</v-icon>
                                     </v-avatar>
                                 </v-badge>
@@ -40,7 +40,7 @@
                         <v-list-item class="mt-2">
                             <div class="text-center">
                                 <v-badge color="grey lighten-1" offset-x="6" offset-y="6" bordered dot>
-                                    <v-avatar tile color="amber" class="rounded-lg" size="40">
+                                    <v-avatar tile color="amber" class="rounded-lg" size="38">
                                         <v-icon dark>mdi-mail</v-icon>
                                     </v-avatar>
                                 </v-badge>
@@ -48,7 +48,7 @@
                         </v-list-item>
                         <v-list-item class="mt-4">
                             <div class="text-center">
-                                <v-avatar tile color="#6B536C" class="rounded-lg" elevation="1" size="40">
+                                <v-avatar tile color="#6B536C" class="rounded-lg" elevation="1" size="38">
                                   <v-icon light>mdi-plus</v-icon>
                                 </v-avatar>
                             </div>
@@ -60,6 +60,17 @@
                     <v-list-item>
                         <v-list-item-title>Channel Title</v-list-item-title>
                     </v-list-item>
+                    <v-list>
+                        <v-list-item dense class="mt-n4 pl-4">
+                            # <span class="ml-2">RoomTitle</span>
+                        </v-list-item>
+                        <v-list-item dense class="mt-n4">
+                            # <span class="font-weight-bold ml-2">job-postings</span>
+                        </v-list-item>
+                        <v-list-item dense class="mt-n4">
+                            # <span class="ml-2">classifieds</span>
+                        </v-list-item>
+                    </v-list>
                 </v-list>
                 </v-row>
             </v-navigation-drawer>
@@ -124,10 +135,10 @@
         
             <v-main>
                 <v-container
-                class="fill-height d-flex align-end"
+                class="fill-height d-flex align-end pb-0"
                 fluid
                 >
-                    <v-row>
+                    <v-row v-for="i of 30" :key="i">
                         <v-col cols="12">
                             <v-row>
                                 <v-col cols="1">
@@ -144,7 +155,7 @@
                     </v-row>
                 </v-container>
             </v-main>
-            <v-footer app inset color="white">
+            <v-footer app inset color="white pt-0 d-flex justify-start">
                 <v-text-field
                 outlined
                 label="New message"
