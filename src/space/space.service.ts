@@ -13,14 +13,12 @@ export class SpaceService {
     constructor(
         @InjectModel('Space')
         private readonly spaceModel: Model<Space>,
-        @InjectModel('User')
-        private readonly userModel: Model<User>,
         @InjectModel('Room')
         private readonly roomModel: Model<Room>
     ) {}
 
     async findAll(): Promise<Space[]> {
-        const spaces = await this.spaceModel.find()
+        const spaces = await this.spaceModel.find().exec()
         return spaces
     }
 
@@ -29,6 +27,7 @@ export class SpaceService {
         const room = new this.roomModel({
             name: "#Welcome"
         })
+        room.save()
         space.rooms.push(room)
         return space.save()
     }
