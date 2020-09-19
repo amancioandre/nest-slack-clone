@@ -5,6 +5,7 @@
   <link href="https://cdn.jsdelivr.net/npm/@mdi/font@5.x/css/materialdesignicons.min.css" rel="stylesheet">
   <link href="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.min.css" rel="stylesheet">
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no, minimal-ui">
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
 </head>
 <body>
   <div id="app">
@@ -176,6 +177,7 @@
                         </v-btn>
                     </template>
                 </v-text-field>
+                <v-btn @click="sendMessage">Send</v-btn>
             </v-footer>
         </v-app>
     </template>
@@ -194,7 +196,13 @@
       vuetify: new Vuetify(),
       data: {
         isAuthenticated: false,
-        payload: {},
+        payload: {
+            username: "amancioandre",
+            password: "123456"
+        },
+        socket: null,
+        channel: null,
+        socketOptions: {}
       },
       methods: {
         async onLogin() {
@@ -214,8 +222,39 @@
             } catch (error) {
                 console.log(error)
             }
+        },
+
+        sendMessage() {
+            console.log("Sending message to server...")
+            this.socket.emit("msgToServer", `CONNECTED AND SENDING MSG TO ${this.channel}`)
         }
       },
+
+      async created() {
+        await this.onLogin()
+        this.channel = prompt("input channel")
+        const token = localStorage.getItem('user-token')
+        this.socketOptions = {
+            transportOptions: {
+                    polling: {
+                    extraHeaders: {
+                        Authorization: `Bearer ${token}`
+                    }
+                }
+            }
+        }
+        this.socket = io.connect(`http://localhost:3000/`)
+        // this.socket = io.connect(`http://localhost:3000/${this.channel}`, this.socketOptions)
+        // this.socket = io.connect(`http://localhost:3000/${this.channel}`)
+        this.socket.on("connect", () => {
+            console.log("CONNECTED TO SOCKET")
+            this.socket.emit('entreiNoCanal', `ENTREI NO CANAL ${this.channel, token}`)
+        })
+
+        this.socket.on('msgToClient', (msg) => {
+            console.log(msg)
+        })
+      }
     })
   </script>
 </body>
