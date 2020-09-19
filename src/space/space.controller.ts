@@ -1,9 +1,8 @@
-import { Controller, Get, Post, Body, Param, Put, Delete, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Put, Delete } from '@nestjs/common';
 import { SpaceService } from './space.service';
 import { Space } from './space.entity';
 import { CreateSpaceDTO } from './dto/create-space.dto';
 import { UpdateSpaceDTO } from './dto/update-space.dto';
-import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { CreateRoomDTO } from './dto/create-room.dto';
 
 @Controller('spaces')
