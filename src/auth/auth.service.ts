@@ -5,12 +5,14 @@ import { User } from 'src/user/user.entity';
 import { Model } from 'mongoose';
 import { SignUpPayloadDTO } from './dto/signup-payload.dto';
 import { LoginPayloadDTO } from './dto/login-payload.dto';
+import { AccessTokenValidateDTO } from './dto/access-token-validate.dto';
 
 @Injectable()
 export class AuthService {
     constructor(
         @InjectModel(User.name) private readonly userModel: Model<User>,
-        private readonly jwtService: JwtService) {}
+        private readonly jwtService: JwtService
+    ) {}
 
     signUp(signUpPayloadDTO: SignUpPayloadDTO): Promise<User> {
         const user = new this.userModel(signUpPayloadDTO)
@@ -33,5 +35,16 @@ export class AuthService {
         }
 
         return null
+    }
+    
+    async validateFromToken(token: string): Promise<User | null> {
+        const decoded: AccessTokenValidateDTO =  this.jwtService.verify(token)
+        const user = await this.userModel.findById(decoded?.sub)
+
+        if (!user) {
+            return null
+        }
+
+        return user
     }
 }
