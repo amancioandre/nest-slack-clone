@@ -3,7 +3,7 @@ import { Room } from './room.entity';
 import { JwtAuthGuard } from 'src/auth/jwt.guard';
 import { RoomService } from './room.service';
 
-@Controller('room')
+@Controller('rooms')
 export class RoomController {
     constructor(private readonly roomService: RoomService) {}
 
