@@ -32,7 +32,7 @@
                         <v-list-item class="mt-2" v-for="(item, i) in channels" :key="i">
                             <div class="text-center">
                                 <v-badge color="red" offset-x="17" offset-y="15" bordered content="24">
-                                    <v-avatar tile color="blue" class="rounded-lg" size="38" @click="connectToChannel(item)">
+                                    <v-avatar tile color="blue" class="rounded-lg" size="38" @click="joinChannel(item)">
                                         <span>{{ item.name }}</span>
                                     </v-avatar>
                                 </v-badge>
@@ -77,7 +77,7 @@
                             <v-icon>mdi-star-outline</v-icon> |
                         </span>
                         <span>
-                            <v-icon>mdi-account-multiple-outline</v-icon> 12 | 
+                            <v-icon>mdi-account-multiple-outline</v-icon> {{clients}} | 
                         </span>
                         <span>
                             <v-icon>mdi-pin-outline</v-icon> 2
@@ -128,24 +128,24 @@
         
             <v-main>
                 <v-container
-                class="fill-height d-flex align-end pb-0"
+                class="fill-height d-flex flex-column align-start justify-end px-0"
                 fluid
                 >
-                    <v-row v-for="i of 30" :key="i">
-                        <v-col cols="12">
-                            <v-row>
-                                <v-col cols="1">
-                                    <v-avatar color="teal" tile size="48" class="rounded">
+                    <template v-if="room">
+                        <v-container class="pb-0" fluid v-for="({owner, time, text}, i) in room.messages" :key="i">
+                            <div class="d-flex flex-row align-start">
+                                <div>
+                                    <v-avatar color="amber" tile size="48" class="rounded">
                                         <span class="white--text headline">AM</span>
                                     </v-avatar>
-                                </v-col>
-                                <v-col cols="11" class="pl-0">
-                                    <p class="mb-0"><span class="font-weight-black mr-2">User Name</span><small class="font-weight-light">7:02 PM</small></p>
-                                    <p>Sed ut perspiciatis unde omnis iste natus error sit voluptatem accusantium doloremque laudantium, totam rem aperiam, eaque ipsa quae ab illo inventore veritatis et quasi architecto beatae vitae dicta sunt explicabo. Nemo enim ipsam voluptatem quia voluptas sit aspernatur aut odit aut fugit, sed quia consequuntur magni dolores eos qui ratione voluptatem sequi nesciunt.</p>
-                                </v-col>
-                            </v-row>
-                        </v-col>
-                    </v-row>
+                                </div>
+                                <div class="pl-2">
+                                    <p class="mb-0"><span class="font-weight-black mr-2">{{ owner.name }}</span><small class="font-weight-light">{{ time | formatDate }} ago</small></p>
+                                    <p>{{ text }}</p>
+                                </div>
+                            </div>
+                        </v-container>
+                    </template>
                 </v-container>
             </v-main>
             <v-footer app inset color="white pt-0 d-flex justify-start">
@@ -159,6 +159,8 @@
                 class="mt-6"
                 auto-grow
                 color="grey lighten-1"
+                v-model="message"
+                @keyup.enter="sendMessage"
             >
                     <template slot="append">
                         <v-btn icon color="grey lighten-1" class="mt-n2">
@@ -169,7 +171,6 @@
                         </v-btn>
                     </template>
                 </v-text-field>
-                <v-btn @click="sendMessage">Send</v-btn>
                 <v-btn @click="onLogin">Login</v-btn>
             </v-footer>
         </v-app>
@@ -179,6 +180,7 @@
   <script src="https://cdn.jsdelivr.net/npm/vue@2.x/dist/vue.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/vuetify@2.x/dist/vuetify.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/axios/0.20.0/axios.min.js" integrity="sha512-quHCp3WbBNkwLfYUMd+KwBAgpVukJu5MncuQaWXgCrfgcxCJAq/fo+oqrRKOj+UKEmyMCG3tb8RB63W+EmrOBg==" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/date-fns/1.30.1/date_fns.min.js" integrity="sha512-F+u8eWHrfY8Xw9BLzZ8rG/0wIvs0y+JyRJrXjp3VjtFPylAEEGwKbua5Ip/oiVhaTDaDs4eU2Xtsxjs/9ag2bQ==" crossorigin="anonymous"></script>
   <script>
     const api = axios.create(({
         baseURL: "http://localhost:3000"
@@ -195,43 +197,25 @@
         },
         socket: null,
         socketOptions: {},
-        sockets: {
-            channel: null,
-        },
         channel: null,
         channels: null,
-        room: null
+        room: null,
+        message: null,
+        clients: 0
       },
 
       methods: {
         async onLogin() {
             try {
+                if (this.socket) {
+                    this.socket.close()
+                }
                 const { data: { accessToken }, status } = await api.post("/auth/login", this.payload)
                 localStorage.setItem("user-token", accessToken)
                 this.isAuthenticated = true
 
                 const token = localStorage.getItem('user-token')
-
-                this.socketOptions = {
-                    transportOptions: {
-                            polling: {
-                            extraHeaders: {
-                                Authorization: `Bearer ${token}`
-                            }
-                        }
-                    },
-                }
-                this.socket = io.connect(`http://localhost:3000/`, this.socketOptions)
-
-                this.socket.on('loadChannels', (channels) => {
-                    if (this.channels !== channels) {
-                        this.channels = channels
-                    }
-
-                    if (!this.channel) {
-                        this.connectToChannel(channels[0])
-                    }
-                })
+                this.handleSocketInit(token)
             } catch (error) {
                 console.log(error)
             }
@@ -246,39 +230,72 @@
             }
         },
 
-        sendMessage() {
-            this.socket.emit("messageToRoom", this.message)
+        handleSocketInit(token) {
+            this.socketOptions = {
+                    transportOptions: {
+                            polling: {
+                            extraHeaders: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    },
+                }
+            this.socket = io.connect(`http://localhost:3000/`, this.socketOptions)
+            this.socket.on("loadChannels", (channels) => this.handleLoadChannels(channels))
+            this.socket.on("joinedRoom", (room) => this.handleJoinRoom(room))
+            this.socket.on("updateClients", (clients) => this.handleUpdateClients(clients))
+            this.socket.on("messageFromRoom", (message) => this.handleMessageFromRoom(message))
         },
 
-        async connectToChannel(channel) {
-            if (this.channel && this.channel === channel) {
-                return
+        handleLoadChannels(channels) {
+            this.channels = channels
+            if (!this.channel) {
+                const [channel, ...others] = channels
+                this.joinChannel(channel)
             }
+        },
 
-            this.channel = channel
+        handleJoinRoom(room) {
+            this.room = room
+        },
 
-            if (this.sockets.channel) {
-                this.sockets.channel.close()
+        handleMessageFromRoom(messages) {
+            this.room.messages = messages
+        },
+
+        handleUpdateClients(clients) {
+            this.clients = clients
+        },
+
+        sendMessage() {
+            if (!this.message) return
+            const payload = {
+                roomId: this.room._id,
+                text: this.message
             }
-
-            this.sockets.channel = io.connect(`http://localhost:3000/${channel._id}`, this.socketOptions)
-            this.sockets.channel.on("joinedRoom", (room) => {
-                console.log("JOINED ROOM", room)
-                this.room = room
-            })
-
-            const [room, ...other] = channel.rooms
-            this.joinRoom(room)
+            this.socket.emit("messageToRoom", payload)
+            this.message = null
         },
 
         joinRoom(room) {
-            this.sockets.channel.emit('joinRoom', room._id)
+            this.socket.emit('joinRoom', room._id)
         },
-  
-        disconnect(from) {
-            from.disconnect()
+
+        joinChannel(channel) {
+            if (this.channel && this.channel._id === channel._id) return
+            this.channel = channel
+            if (!this.room) {
+                const [room, ...others] = channel.rooms
+                this.joinRoom(room)
+            }
         },
       },
+
+      filters: {
+          formatDate: (date) => {
+              return dateFns.distanceInWordsToNow(date)
+          }
+      }
     })
   </script>
 </body>

@@ -7,8 +7,11 @@ export class Message extends Document {
     @Prop()
     text: string
 
-    @Prop([{type: SchemaTypes.ObjectId, ref: 'User'}])
+    @Prop({type: SchemaTypes.ObjectId, ref: 'User'})
     owner: User
+
+    @Prop()
+    time: number
 }
 
 export const MessageSchema = SchemaFactory.createForClass(Message)
