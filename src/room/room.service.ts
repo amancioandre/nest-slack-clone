@@ -14,7 +14,13 @@ export class RoomService {
     ) {}
 
     async findOne(id: string): Promise<Room> {
-        const room = await this.roomModel.findById(id).populate("messages")
+        const room = await this.roomModel.findById(id).populate({
+            path: "messages",
+            populate: {
+                path: "owner",
+                select: "name username"
+            }
+        })
 
         if (!room) {
             throw new NotFoundException('Room not found.')
