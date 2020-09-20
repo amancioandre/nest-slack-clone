@@ -54,7 +54,7 @@
                     </v-list-item>
                     <v-list>
                         <template v-if="channel">
-                            <v-list-item dense class="mt-n4 pl-4" v-for="(room, i) in channel.rooms" :key="i">
+                            <v-list-item dense class="pl-4" v-for="(room, i) in channel.rooms" :key="i" @click="joinRoom(room)">
                                 <span class="ml-2">
                                     {{ room.name }}
                                 </span>
@@ -70,37 +70,40 @@
                 elevation="1"
                 style="border-bottom: 1px 1px black;"
             >
-                <v-toolbar-title>#RoomTitle</v-toolbar-title>
-                <div class="ml-4">
-                    <span>
-                        <v-icon>mdi-star-outline</v-icon> |
-                    </span>
-                    <span>
-                        <v-icon>mdi-account-multiple-outline</v-icon> 12 | 
-                    </span>
-                    <span>
-                        <v-icon>mdi-pin-outline</v-icon> 2
-                    </span>
-                </div>
+                <template v-if="room">
+                    <v-toolbar-title>{{room.name}}</v-toolbar-title>
+                    <div class="ml-4">
+                        <span>
+                            <v-icon>mdi-star-outline</v-icon> |
+                        </span>
+                        <span>
+                            <v-icon>mdi-account-multiple-outline</v-icon> 12 | 
+                        </span>
+                        <span>
+                            <v-icon>mdi-pin-outline</v-icon> 2
+                        </span>
+                    </div>
+                    <v-spacer></v-spacer>
+                    <v-btn icon>
+                        <v-icon>
+                            mdi-information-outline
+                        </v-icon>
+                    </v-btn>
+                    <v-btn icon class="mr-2">
+                        <v-icon>
+                            mdi-cog-outline
+                        </v-icon>
+                    </v-btn>
+                    <v-text-field
+                        outlined
+                        label="Search"
+                        append-icon="mdi-magnify"
+                        dense
+                        class="mt-6"
+                        color="grey lighten-1"
+                    ></v-text-field>
+                </template>
                 <v-spacer></v-spacer>
-                <v-btn icon>
-                    <v-icon>
-                        mdi-information-outline
-                    </v-icon>
-                </v-btn>
-                <v-btn icon class="mr-2">
-                    <v-icon>
-                        mdi-cog-outline
-                    </v-icon>
-                </v-btn>
-                <v-text-field
-                    outlined
-                    label="Search"
-                    append-icon="mdi-magnify"
-                    dense
-                    class="mt-6"
-                    color="grey lighten-1"
-                ></v-text-field>
                 <v-menu
                 left
                 bottom
@@ -167,7 +170,7 @@
                     </template>
                 </v-text-field>
                 <v-btn @click="sendMessage">Send</v-btn>
-                <v-btn @click="connect">Connect</v-btn>
+                <v-btn @click="onLogin">Login</v-btn>
             </v-footer>
         </v-app>
     </template>
@@ -194,17 +197,41 @@
         socketOptions: {},
         sockets: {
             channel: null,
-            room: null
         },
         channel: null,
-        channels: null
+        channels: null,
+        room: null
       },
+
       methods: {
         async onLogin() {
             try {
                 const { data: { accessToken }, status } = await api.post("/auth/login", this.payload)
                 localStorage.setItem("user-token", accessToken)
                 this.isAuthenticated = true
+
+                const token = localStorage.getItem('user-token')
+
+                this.socketOptions = {
+                    transportOptions: {
+                            polling: {
+                            extraHeaders: {
+                                Authorization: `Bearer ${token}`
+                            }
+                        }
+                    },
+                }
+                this.socket = io.connect(`http://localhost:3000/`, this.socketOptions)
+
+                this.socket.on('loadChannels', (channels) => {
+                    if (this.channels !== channels) {
+                        this.channels = channels
+                    }
+
+                    if (!this.channel) {
+                        this.connectToChannel(channels[0])
+                    }
+                })
             } catch (error) {
                 console.log(error)
             }
@@ -220,40 +247,36 @@
         },
 
         sendMessage() {
-            console.log("Sending message to server...")
-            this.socket.emit("msgToServer", `CONNECTED AND SENDING MSG TO ${this.channel}`)
-        },
-
-        async connect() {
-            await this.onLogin()
-            const token = localStorage.getItem('user-token')
-            this.socketOptions = {
-                transportOptions: {
-                        polling: {
-                        extraHeaders: {
-                            Authorization: `Bearer ${token}`
-                        }
-                    }
-                }
-            }
-            this.socket = io.connect(`http://localhost:3000/`, this.socketOptions)
-
-            this.socket.on('loadChannels', (channels) => {
-                this.channels = channels
-            })
+            this.socket.emit("messageToRoom", this.message)
         },
 
         async connectToChannel(channel) {
+            if (this.channel && this.channel === channel) {
+                return
+            }
+
             this.channel = channel
 
-            if (this.socket.channel) {
-                this.socket.channel.close()
+            if (this.sockets.channel) {
+                this.sockets.channel.close()
             }
-            this.sockets.channel = io.connect(`http://localhost:3000/${channel._id}`)
+
+            this.sockets.channel = io.connect(`http://localhost:3000/${channel._id}`, this.socketOptions)
+            this.sockets.channel.on("joinedRoom", (room) => {
+                console.log("JOINED ROOM", room)
+                this.room = room
+            })
+
+            const [room, ...other] = channel.rooms
+            this.joinRoom(room)
+        },
+
+        joinRoom(room) {
+            this.sockets.channel.emit('joinRoom', room._id)
         },
   
-        async disconnect(from) {
-            await from.disconnect()
+        disconnect(from) {
+            from.disconnect()
         },
       },
     })
