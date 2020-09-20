@@ -29,20 +29,11 @@
                     dense
                     nav
                     >
-                        <v-list-item class="mt-2">
+                        <v-list-item class="mt-2" v-for="(item, i) in channels" :key="i">
                             <div class="text-center">
                                 <v-badge color="red" offset-x="17" offset-y="15" bordered content="24">
-                                    <v-avatar tile color="blue" class="rounded-lg" size="38">
-                                        <v-icon dark>mdi-alarm</v-icon>
-                                    </v-avatar>
-                                </v-badge>
-                            </div>
-                        </v-list-item>
-                        <v-list-item class="mt-2">
-                            <div class="text-center">
-                                <v-badge color="grey lighten-1" offset-x="6" offset-y="6" bordered dot>
-                                    <v-avatar tile color="amber" class="rounded-lg" size="38">
-                                        <v-icon dark>mdi-mail</v-icon>
+                                    <v-avatar tile color="blue" class="rounded-lg" size="38" @click="connectToChannel(item)">
+                                        <span>{{ item.name }}</span>
                                     </v-avatar>
                                 </v-badge>
                             </div>
@@ -62,15 +53,13 @@
                         <v-list-item-title>Channel Title</v-list-item-title>
                     </v-list-item>
                     <v-list>
-                        <v-list-item dense class="mt-n4 pl-4">
-                            # <span class="ml-2">RoomTitle</span>
-                        </v-list-item>
-                        <v-list-item dense class="mt-n4">
-                            # <span class="font-weight-bold ml-2">job-postings</span>
-                        </v-list-item>
-                        <v-list-item dense class="mt-n4">
-                            # <span class="ml-2">classifieds</span>
-                        </v-list-item>
+                        <template v-if="channel">
+                            <v-list-item dense class="mt-n4 pl-4" v-for="(room, i) in channel.rooms" :key="i">
+                                <span class="ml-2">
+                                    {{ room.name }}
+                                </span>
+                            </v-list-item>
+                        </template>
                     </v-list>
                 </v-list>
                 </v-row>
@@ -178,6 +167,7 @@
                     </template>
                 </v-text-field>
                 <v-btn @click="sendMessage">Send</v-btn>
+                <v-btn @click="connect">Connect</v-btn>
             </v-footer>
         </v-app>
     </template>
@@ -201,8 +191,13 @@
             password: "123456"
         },
         socket: null,
+        socketOptions: {},
+        sockets: {
+            channel: null,
+            room: null
+        },
         channel: null,
-        socketOptions: {}
+        channels: null
       },
       methods: {
         async onLogin() {
@@ -227,34 +222,40 @@
         sendMessage() {
             console.log("Sending message to server...")
             this.socket.emit("msgToServer", `CONNECTED AND SENDING MSG TO ${this.channel}`)
-        }
-      },
+        },
 
-      async created() {
-        await this.onLogin()
-        this.channel = prompt("input channel")
-        const token = localStorage.getItem('user-token')
-        this.socketOptions = {
-            transportOptions: {
-                    polling: {
-                    extraHeaders: {
-                        Authorization: `Bearer ${token}`
+        async connect() {
+            await this.onLogin()
+            const token = localStorage.getItem('user-token')
+            this.socketOptions = {
+                transportOptions: {
+                        polling: {
+                        extraHeaders: {
+                            Authorization: `Bearer ${token}`
+                        }
                     }
                 }
             }
-        }
-        this.socket = io.connect(`http://localhost:3000/`)
-        // this.socket = io.connect(`http://localhost:3000/${this.channel}`, this.socketOptions)
-        // this.socket = io.connect(`http://localhost:3000/${this.channel}`)
-        this.socket.on("connect", () => {
-            console.log("CONNECTED TO SOCKET")
-            this.socket.emit('entreiNoCanal', `ENTREI NO CANAL ${this.channel, token}`)
-        })
+            this.socket = io.connect(`http://localhost:3000/`, this.socketOptions)
 
-        this.socket.on('msgToClient', (msg) => {
-            console.log(msg)
-        })
-      }
+            this.socket.on('loadChannels', (channels) => {
+                this.channels = channels
+            })
+        },
+
+        async connectToChannel(channel) {
+            this.channel = channel
+
+            if (this.socket.channel) {
+                this.socket.channel.close()
+            }
+            this.sockets.channel = io.connect(`http://localhost:3000/${channel._id}`)
+        },
+  
+        async disconnect(from) {
+            await from.disconnect()
+        },
+      },
     })
   </script>
 </body>

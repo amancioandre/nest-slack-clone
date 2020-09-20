@@ -24,7 +24,7 @@ import { Room, RoomSchema } from 'src/room/room.entity';
         ]),
     ],
     providers: [UserService],
-    exports: [],
+    exports: [UserService],
     controllers: [UserController]
 })
 export class UserModule {}

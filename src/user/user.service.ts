@@ -16,11 +16,9 @@ export class UserService {
     async getChannels(id: string): Promise<Space[]> {
         try {
             const rooms = (await this.roomModel.find({ users: Types.ObjectId(id)} as any).exec())
-
-            console.log(rooms)
             const spaces = await this.spaceModel.find({
                 rooms: { "$in": rooms }
-            })
+            }).populate({ path: "rooms", select: "name"})
 
             return spaces
         } catch (error) {

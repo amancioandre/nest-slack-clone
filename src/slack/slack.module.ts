@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
-import { JwtModule } from '@nestjs/jwt';
 import { MongooseModule } from '@nestjs/mongoose';
 import { AuthModule } from 'src/auth/auth.module';
-import { SpaceModule } from 'src/space/space.module';
+import { RoomModule } from 'src/room/room.module';
 import { User, UserSchema } from 'src/user/user.entity';
+import { UserModule } from 'src/user/user.module';
 import { SlackGateway } from './slack.gateway';
 
 @Module({
@@ -15,7 +15,8 @@ import { SlackGateway } from './slack.gateway';
             }
         ]),
         AuthModule,
-        SpaceModule
+        UserModule,
+        RoomModule
     ],
     providers: [SlackGateway]
 })
