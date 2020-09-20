@@ -5,8 +5,9 @@ import { AuthModule } from './auth/auth.module';
 import { SpaceModule } from './space/space.module';
 import { RoomModule } from './room/room.module';
 import { SlackModule } from './slack/slack.module';
+import { MessageModule } from './message/message.module';
 @Module({
-  imports: [MongooseModule.forRoot('mongodb://localhost:27017/nest-slack-clone'), UserModule, AuthModule, SpaceModule, RoomModule, SlackModule],
+  imports: [MongooseModule.forRoot('mongodb://localhost:27017/nest-slack-clone'), UserModule, AuthModule, SpaceModule, RoomModule, SlackModule, MessageModule],
   controllers: [],
   providers: [],
 })
